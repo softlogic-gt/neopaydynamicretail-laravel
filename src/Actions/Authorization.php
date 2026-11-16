@@ -18,12 +18,12 @@ final class Authorization extends PosAction
 
     public static function saleInstallments(int|string $trace, float $amount, int $installments): static
     {
-        return self::make('SA', $trace, $amount, sprintf('VC%02d', $installments));
+        return self::make('SA', $trace, $amount, sprintf('VC%02d', self::count($installments, 'installments')));
     }
 
     public static function saleExtraFinancing(int|string $trace, float $amount, int $plan): static
     {
-        return self::make('SA', $trace, $amount, sprintf('EF%02d', $plan));
+        return self::make('SA', $trace, $amount, sprintf('EF%02d', self::count($plan, 'plan')));
     }
 
     public static function saleDiscount(int|string $trace, float $amount, float $discount): static
