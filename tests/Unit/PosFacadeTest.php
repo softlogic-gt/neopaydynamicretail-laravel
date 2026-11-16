@@ -72,7 +72,8 @@ class PosFacadeTest extends TestCase
 
     public function test_client_can_be_swapped_in_the_container(): void
     {
-        $fake = new class extends PosClient {
+        $fake = new class extends PosClient
+        {
             public array $calls = [];
 
             public function post(string $endpoint, array $body): PosResponse

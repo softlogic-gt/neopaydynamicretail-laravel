@@ -23,7 +23,7 @@ class ActionsTest extends TestCase
             SettlementBatch::class => 'settlementbatch',
             ReportTotals::class => 'reporttotals',
         ] as $class => $endpoint) {
-            (new $class())->submit();
+            (new $class)->submit();
         }
 
         $urls = array_map(fn ($r) => $r->url(), $this->posRequests());

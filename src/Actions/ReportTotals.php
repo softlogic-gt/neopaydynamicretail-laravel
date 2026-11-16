@@ -2,7 +2,7 @@
 
 namespace SoftlogicGT\NeoPayDynamicRetail\Actions;
 
-class ReportTotals extends PosAction
+final class ReportTotals extends PosAction
 {
     protected string $endpoint = 'reporttotals';
 }

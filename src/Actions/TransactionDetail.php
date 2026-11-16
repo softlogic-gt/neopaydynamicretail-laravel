@@ -2,7 +2,7 @@
 
 namespace SoftlogicGT\NeoPayDynamicRetail\Actions;
 
-class TransactionDetail extends PosAction
+final class TransactionDetail extends PosAction
 {
     protected string $endpoint = 'transactiondetail';
 }

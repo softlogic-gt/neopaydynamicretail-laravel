@@ -65,7 +65,7 @@ class Pos
 
     public function settlement(): PosResponse
     {
-        return (new Settlement())->submit();
+        return (new Settlement)->submit();
     }
 
     public function voucherReprint(int|string $trace): PosResponse
@@ -80,7 +80,7 @@ class Pos
 
     public function transactionDetail(): PosResponse
     {
-        return (new TransactionDetail())->submit();
+        return (new TransactionDetail)->submit();
     }
 
     public function settlementDetail(int|string|null $batch = null): PosResponse
@@ -90,11 +90,11 @@ class Pos
 
     public function settlementBatch(): PosResponse
     {
-        return (new SettlementBatch())->submit();
+        return (new SettlementBatch)->submit();
     }
 
     public function reportTotals(): PosResponse
     {
-        return (new ReportTotals())->submit();
+        return (new ReportTotals)->submit();
     }
 }

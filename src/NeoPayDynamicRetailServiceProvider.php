@@ -8,7 +8,7 @@ class NeoPayDynamicRetailServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/neopay-dynamic-retail.php', 'neopay-dynamic-retail');
+        $this->mergeConfigFrom(__DIR__.'/../config/neopay-dynamic-retail.php', 'neopay-dynamic-retail');
 
         $this->app->singleton(PosClient::class);
         $this->app->singleton(Pos::class);
@@ -17,7 +17,7 @@ class NeoPayDynamicRetailServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/neopay-dynamic-retail.php' => config_path('neopay-dynamic-retail.php'),
+            __DIR__.'/../config/neopay-dynamic-retail.php' => config_path('neopay-dynamic-retail.php'),
         ], 'neopay-dynamic-retail-config');
     }
 }

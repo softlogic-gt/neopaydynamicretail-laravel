@@ -4,9 +4,7 @@ namespace SoftlogicGT\NeoPayDynamicRetail;
 
 class PosResponse
 {
-    public function __construct(private readonly array $data)
-    {
-    }
+    public function __construct(private readonly array $data) {}
 
     public function get(string $key, mixed $default = null): mixed
     {

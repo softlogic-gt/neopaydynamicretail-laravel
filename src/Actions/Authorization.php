@@ -2,58 +2,58 @@
 
 namespace SoftlogicGT\NeoPayDynamicRetail\Actions;
 
-class Authorization extends PosAction
+final class Authorization extends PosAction
 {
     protected string $endpoint = 'paymentcommerceauthorization';
 
     public static function sale(int|string $trace, float $amount, ?float $tip = null, string $additionalData = ''): static
     {
-        return static::make('SA', $trace, $amount, $additionalData, $tip === null ? '' : static::decimals($tip));
+        return self::make('SA', $trace, $amount, $additionalData, $tip === null ? '' : self::decimals($tip));
     }
 
     public static function salePoints(int|string $trace, float $points): static
     {
-        return static::make('SA', $trace, $points, 'LU');
+        return self::make('SA', $trace, $points, 'LU');
     }
 
     public static function saleInstallments(int|string $trace, float $amount, int $installments): static
     {
-        return static::make('SA', $trace, $amount, sprintf('VC%02d', $installments));
+        return self::make('SA', $trace, $amount, sprintf('VC%02d', $installments));
     }
 
     public static function saleExtraFinancing(int|string $trace, float $amount, int $plan): static
     {
-        return static::make('SA', $trace, $amount, sprintf('EF%02d', $plan));
+        return self::make('SA', $trace, $amount, sprintf('EF%02d', $plan));
     }
 
     public static function saleDiscount(int|string $trace, float $amount, float $discount): static
     {
-        return static::make('SA', $trace, $amount, sprintf('VD%012d', static::amount($discount)));
+        return self::make('SA', $trace, $amount, sprintf('VD%012d', self::amount($discount)));
     }
 
     public static function annulment(int|string $trace): static
     {
-        return static::make('AN', $trace);
+        return self::make('AN', $trace);
     }
 
     public static function reverse(int|string $trace, float $amount): static
     {
-        return static::make('RV', $trace, $amount);
+        return self::make('RV', $trace, $amount);
     }
 
     public static function checkIn(int|string $trace, float $amount, int|string $folio): static
     {
-        return static::make('CI', $trace, $amount, '', '', $folio);
+        return self::make('CI', $trace, $amount, '', '', $folio);
     }
 
     public static function surcharge(int|string $trace, float $amount, int|string $folio): static
     {
-        return static::make('RC', $trace, $amount, '', '', $folio);
+        return self::make('RC', $trace, $amount, '', '', $folio);
     }
 
     public static function checkOut(int|string $trace, float $amount, int|string $folio, float $tip = 0, float $touristTax = 0): static
     {
-        return static::make('CO', $trace, $amount, '', static::decimals($tip), $folio, static::decimals($touristTax));
+        return self::make('CO', $trace, $amount, '', self::decimals($tip), $folio, self::decimals($touristTax));
     }
 
     private static function make(
@@ -67,21 +67,21 @@ class Authorization extends PosAction
     ): static {
         $body = [
             'transactionType' => $type,
-            'systemsTraceNo' => static::trace($trace),
+            'systemsTraceNo' => self::trace($trace),
             'additionalData' => $additionalData,
             'amount' => [
-                'amountTrans' => $amount === null ? '' : static::amount($amount),
+                'amountTrans' => $amount === null ? '' : self::amount($amount),
                 'additionalAmounts' => $tip,
             ],
         ];
 
         if ($folio !== null) {
             $body['privateUse63'] = [
-                'lodgingFolioNumber14' => static::folio($folio),
+                'lodgingFolioNumber14' => self::folio($folio),
                 'taxAmount1' => $touristTax,
             ];
         }
 
-        return new static($body);
+        return new self($body);
     }
 }
