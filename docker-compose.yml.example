@@ -1,0 +1,9 @@
+services:
+    app:
+        build:
+            context: ./
+            dockerfile: dockerfiles/app/Dockerfile
+        user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+        volumes:
+            - './:/var/www'
+        command: ['sleep', 'infinity']
