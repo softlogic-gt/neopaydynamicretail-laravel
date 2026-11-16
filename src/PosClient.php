@@ -14,6 +14,13 @@ class PosClient
 
     private const TOKEN_TTL = 240;
 
+    private PosLogger $logger;
+
+    public function __construct(?PosLogger $logger = null)
+    {
+        $this->logger = $logger ?? new PosLogger;
+    }
+
     public function post(string $endpoint, array $body): PosResponse
     {
         $body += [
@@ -36,9 +43,16 @@ class PosClient
 
     private function send(string $endpoint, array $body, bool $retry = true): array
     {
+        $this->logger->request($endpoint, $body);
+
         try {
-            return $this->http()->post($endpoint, $body)->throw()->json() ?? [];
+            $data = $this->http()->post($endpoint, $body)->throw()->json() ?? [];
+            $this->logger->response($endpoint, $data);
+
+            return $data;
         } catch (RequestException $e) {
+            $this->logger->failure($endpoint, $e->response->status());
+
             if ($retry && $e->response->status() === 401) {
                 Cache::forget(self::TOKEN_KEY);
 
@@ -74,6 +88,8 @@ class PosClient
                     ->throw()
                     ->json('accessToken.token');
             } catch (RequestException $e) {
+                $this->logger->failure('authenticate', $e->response->status());
+
                 throw new PosException($e->getMessage(), [], $e);
             }
 

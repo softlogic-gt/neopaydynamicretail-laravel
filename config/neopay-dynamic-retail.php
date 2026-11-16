@@ -9,5 +9,6 @@ return [
     'merchant_password' => env('NEOPAY_POS_MERCHANT_PASSWORD'),
     'terminal_id' => env('NEOPAY_POS_TERMINAL_ID'),
     'card_acq_id' => env('NEOPAY_POS_CARD_ACQ_ID'),
+    'log_channel' => env('NEOPAY_POS_LOG_CHANNEL'),
     'timeout' => env('NEOPAY_POS_TIMEOUT', 30),
 ];
