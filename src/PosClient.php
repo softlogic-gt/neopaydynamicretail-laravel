@@ -4,39 +4,76 @@ namespace SoftlogicGT\NeoPayDynamicRetail;
 
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use SoftlogicGT\NeoPayDynamicRetail\Exceptions\PosException;
 
 class PosClient
 {
+    private const TOKEN_KEY = 'neopay-dynamic-retail.token';
+
+    private const TOKEN_TTL = 240;
+
     public function post(string $endpoint, array $body): array
     {
+        $body += [
+            'merchant' => [
+                'terminalId' => config('neopay-dynamic-retail.terminal_id'),
+                'cardAcqId' => config('neopay-dynamic-retail.card_acq_id'),
+            ],
+        ];
+
         try {
-            return $this->http()->post($endpoint, $body + $this->identity())->throw()->json() ?? [];
+            $response = $this->http()->post($endpoint, $body)->throw()->json() ?? [];
         } catch (RequestException $e) {
-            throw new PosException($e->getMessage(), $e->getCode(), $e);
+            throw new PosException($e->getMessage(), [], $e);
         }
+
+        $code = $response['responseCode'] ?? null;
+
+        if ($code !== '00') {
+            $reason = $response['privateUse63']['alternateHostResponse22'] ?? "responseCode {$code}";
+            throw new PosException($reason, $response);
+        }
+
+        return $response;
     }
 
     private function http(): PendingRequest
     {
-        $url = config('neopay-dynamic-retail.url');
-
-        if (!$url) {
-            throw new PosException('NEOPAY_POS_URL is not set.');
-        }
-
-        return Http::baseUrl($url)
+        return Http::baseUrl($this->required('url'))
             ->timeout(config('neopay-dynamic-retail.timeout'))
-            ->withBasicAuth((string) config('neopay-dynamic-retail.user'), (string) config('neopay-dynamic-retail.password'))
-            ->acceptJson();
+            ->acceptJson()
+            ->withHeaders([
+                'Authorization' => $this->token(),
+                'merchantUser' => (string) config('neopay-dynamic-retail.merchant_user'),
+                'merchantPasswd' => (string) config('neopay-dynamic-retail.merchant_password'),
+            ]);
     }
 
-    private function identity(): array
+    private function token(): string
     {
-        return [
-            'merchantId' => config('neopay-dynamic-retail.merchant_id'),
-            'terminalId' => config('neopay-dynamic-retail.terminal_id'),
-        ];
+        return Cache::remember(self::TOKEN_KEY, self::TOKEN_TTL, function () {
+            try {
+                $token = Http::timeout(config('neopay-dynamic-retail.timeout'))
+                    ->withHeaders([
+                        'membershipId' => (string) config('neopay-dynamic-retail.membership_id'),
+                        'secretKey' => (string) config('neopay-dynamic-retail.secret_key'),
+                    ])
+                    ->get($this->required('auth_url'))
+                    ->throw()
+                    ->json('accessToken.token');
+            } catch (RequestException $e) {
+                throw new PosException($e->getMessage(), [], $e);
+            }
+
+            return $token ?: throw new PosException('Authentication did not return a token.');
+        });
+    }
+
+    private function required(string $key): string
+    {
+        return config("neopay-dynamic-retail.{$key}")
+            ?: throw new PosException("neopay-dynamic-retail.{$key} is not set.");
     }
 }

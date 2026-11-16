@@ -13,20 +13,28 @@ abstract class PosAction
         $this->client ??= new PosClient();
     }
 
-    public static function make(array $body = []): static
-    {
-        return new static($body);
-    }
-
-    public function setBody(array $body): static
-    {
-        $this->body = $body;
-
-        return $this;
-    }
-
     public function submit(): array
     {
         return $this->client->post($this->endpoint, $this->body);
+    }
+
+    protected static function amount(float $value): string
+    {
+        return (string) (int) round($value * 100);
+    }
+
+    protected static function decimals(float $value): string
+    {
+        return sprintf('%03d', (int) round($value * 100));
+    }
+
+    protected static function trace(int|string $number): string
+    {
+        return str_pad((string) $number, 6, '0', STR_PAD_LEFT);
+    }
+
+    protected static function folio(int|string $number): string
+    {
+        return str_pad((string) $number, 12, '0', STR_PAD_LEFT);
     }
 }
