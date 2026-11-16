@@ -61,6 +61,7 @@ Variables del `.env`:
 | `NEOPAY_POS_MERCHANT_PASSWORD` | Contraseña de autenticación del comercio |
 | `NEOPAY_POS_TERMINAL_ID` | Terminal (8 caracteres) |
 | `NEOPAY_POS_CARD_ACQ_ID` | Afiliación (15 caracteres) |
+| `NEOPAY_POS_LOG_CHANNEL` | Canal de log de Laravel para registrar peticiones (desactivado si está vacío) |
 | `NEOPAY_POS_TIMEOUT` | Timeout en segundos (por defecto 30) |
 
 No se incluyen URLs ni credenciales por defecto: si falta alguna, el paquete lanza `PosException`.
@@ -126,6 +127,25 @@ try {
     $e->response;     // respuesta completa de la API
 }
 ```
+
+### Validación
+
+Antes de enviar cualquier petición se validan los datos y, si algo es inválido, se lanza `InvalidArgumentException` sin llamar a la API:
+
+- Montos, puntos y descuentos mayores que cero y de máximo 12 dígitos (propina e impuesto turístico pueden ser cero).
+- Número de auditoría de 1 a 6 dígitos, folio y referencia de 1 a 12 dígitos, solo numéricos.
+- Cuotas y plan de extra financiamiento entre 1 y 99.
+- En `sendDigitalVoucher`, `$type` y `$to` se envían juntos o ninguno.
+
+### Logging
+
+Desactivado por defecto. Para activarlo, define el canal en el `.env`:
+
+```
+NEOPAY_POS_LOG_CHANNEL=stack
+```
+
+Se registran la petición, la respuesta y los fallos HTTP de cada llamada. Nunca se registran credenciales ni el token, y se enmascaran el nombre del tarjetahabiente, los vouchers e impresiones de cierre y reportes, el nombre y destino de la notificación, y el número de tarjeta (solo se conservan los últimos 4 dígitos).
 
 ### Autenticación
 
