@@ -14,7 +14,7 @@ class PosClient
 
     private const TOKEN_TTL = 240;
 
-    public function post(string $endpoint, array $body): array
+    public function post(string $endpoint, array $body): PosResponse
     {
         $body += [
             'merchant' => [
@@ -23,12 +23,7 @@ class PosClient
             ],
         ];
 
-        try {
-            $response = $this->http()->post($endpoint, $body)->throw()->json() ?? [];
-        } catch (RequestException $e) {
-            throw new PosException($e->getMessage(), [], $e);
-        }
-
+        $response = $this->send($endpoint, $body);
         $code = $response['responseCode'] ?? null;
 
         if ($code !== '00') {
@@ -36,7 +31,22 @@ class PosClient
             throw new PosException($reason, $response);
         }
 
-        return $response;
+        return new PosResponse($response);
+    }
+
+    private function send(string $endpoint, array $body, bool $retry = true): array
+    {
+        try {
+            return $this->http()->post($endpoint, $body)->throw()->json() ?? [];
+        } catch (RequestException $e) {
+            if ($retry && $e->response->status() === 401) {
+                Cache::forget(self::TOKEN_KEY);
+
+                return $this->send($endpoint, $body, false);
+            }
+
+            throw new PosException($e->getMessage(), [], $e);
+        }
     }
 
     private function http(): PendingRequest

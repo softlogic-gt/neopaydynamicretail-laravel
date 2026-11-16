@@ -3,6 +3,7 @@
 namespace SoftlogicGT\NeoPayDynamicRetail\Actions;
 
 use SoftlogicGT\NeoPayDynamicRetail\PosClient;
+use SoftlogicGT\NeoPayDynamicRetail\PosResponse;
 
 abstract class PosAction
 {
@@ -10,10 +11,10 @@ abstract class PosAction
 
     public function __construct(protected array $body = [], protected ?PosClient $client = null)
     {
-        $this->client ??= new PosClient();
+        $this->client ??= app(PosClient::class);
     }
 
-    public function submit(): array
+    public function submit(): PosResponse
     {
         return $this->client->post($this->endpoint, $this->body);
     }

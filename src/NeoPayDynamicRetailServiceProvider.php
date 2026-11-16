@@ -9,6 +9,9 @@ class NeoPayDynamicRetailServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/neopay-dynamic-retail.php', 'neopay-dynamic-retail');
+
+        $this->app->singleton(PosClient::class);
+        $this->app->singleton(Pos::class);
     }
 
     public function boot(): void
