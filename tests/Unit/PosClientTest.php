@@ -2,10 +2,12 @@
 
 namespace SoftlogicGT\NeoPayDynamicRetail\Tests\Unit;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use SoftlogicGT\NeoPayDynamicRetail\Actions\Authorization;
 use SoftlogicGT\NeoPayDynamicRetail\Actions\SettlementDetail;
+use SoftlogicGT\NeoPayDynamicRetail\Exceptions\PosConnectionException;
 use SoftlogicGT\NeoPayDynamicRetail\Exceptions\PosException;
 use SoftlogicGT\NeoPayDynamicRetail\Tests\TestCase;
 
@@ -134,5 +136,36 @@ class PosClientTest extends TestCase
         } catch (PosException) {
             $this->assertCount(2, $this->posRequests());
         }
+    }
+
+    public function test_timeout_on_pos_throws_connection_exception_without_retrying(): void
+    {
+        $calls = 0;
+        Http::fake([
+            'auth.test/*' => Http::response(['accessToken' => ['token' => 'JWT']]),
+            'pos.test/*' => function () use (&$calls) {
+                $calls++;
+
+                throw new ConnectionException('cURL error 28: Operation timed out');
+            },
+        ]);
+
+        try {
+            Authorization::sale(1, 10)->submit();
+            $this->fail('Expected PosConnectionException');
+        } catch (PosConnectionException $e) {
+            $this->assertInstanceOf(PosException::class, $e);
+            $this->assertStringContainsString('timed out', $e->getMessage());
+            $this->assertSame([], $e->response);
+            $this->assertSame(1, $calls);
+        }
+    }
+
+    public function test_connection_failure_on_authentication_throws_connection_exception(): void
+    {
+        Http::fake(['auth.test/*' => fn () => throw new ConnectionException('Could not resolve host')]);
+
+        $this->expectException(PosConnectionException::class);
+        Authorization::sale(1, 10)->submit();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace SoftlogicGT\NeoPayDynamicRetail\Tests\Unit;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use SoftlogicGT\NeoPayDynamicRetail\Actions\Authorization;
@@ -106,5 +107,22 @@ class LoggingTest extends TestCase
         }
 
         $this->assertSame(['endpoint' => 'authenticate', 'status' => 401], $this->logged[1][2]);
+    }
+
+    public function test_connection_failure_is_logged_with_null_status(): void
+    {
+        Http::fake([
+            'auth.test/*' => Http::response(['accessToken' => ['token' => 'JWT']]),
+            'pos.test/*' => fn () => throw new ConnectionException('timed out'),
+        ]);
+        $this->captureLogs();
+
+        try {
+            Authorization::sale(1, 10)->submit();
+        } catch (PosException) {
+        }
+
+        $failure = collect($this->logged)->first(fn ($l) => $l[1] === 'neopay-dynamic-retail failure');
+        $this->assertSame(['endpoint' => 'authorizationpaymentcommerce', 'status' => null], $failure[2]);
     }
 }

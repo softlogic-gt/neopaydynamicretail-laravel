@@ -128,6 +128,24 @@ try {
 }
 ```
 
+### Timeouts y estado desconocido
+
+Las operaciones son síncronas: la petición espera la respuesta del POS (por ejemplo, a que el cliente pase la tarjeta). Si el POS no está conectado o no responde dentro de `NEOPAY_POS_TIMEOUT`, se lanza `PosConnectionException` (subclase de `PosException`) y la petición **no se reintenta**.
+
+Una `PosConnectionException` significa que el resultado es desconocido: el cobro pudo o no haberse realizado. En ese caso confirma con `transactionDetail()` o usa `reverse()` antes de volver a cobrar.
+
+```php
+use SoftlogicGT\NeoPayDynamicRetail\Exceptions\PosConnectionException;
+
+try {
+    NeoPayPos::sale(230, 100.50);
+} catch (PosConnectionException $e) {
+    // timeout o sin conexión: estado desconocido
+} catch (PosException $e) {
+    // rechazado por el POS o error HTTP
+}
+```
+
 ### Validación
 
 Antes de enviar cualquier petición se validan los datos y, si algo es inválido, se lanza `InvalidArgumentException` sin llamar a la API:

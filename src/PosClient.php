@@ -2,10 +2,12 @@
 
 namespace SoftlogicGT\NeoPayDynamicRetail;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use SoftlogicGT\NeoPayDynamicRetail\Exceptions\PosConnectionException;
 use SoftlogicGT\NeoPayDynamicRetail\Exceptions\PosException;
 
 class PosClient
@@ -60,6 +62,10 @@ class PosClient
             }
 
             throw new PosException($e->getMessage(), [], $e);
+        } catch (ConnectionException $e) {
+            $this->logger->failure($endpoint, null);
+
+            throw new PosConnectionException($e->getMessage(), [], $e);
         }
     }
 
@@ -91,6 +97,10 @@ class PosClient
                 $this->logger->failure('authenticate', $e->response->status());
 
                 throw new PosException($e->getMessage(), [], $e);
+            } catch (ConnectionException $e) {
+                $this->logger->failure('authenticate', null);
+
+                throw new PosConnectionException($e->getMessage(), [], $e);
             }
 
             return $token ?: throw new PosException('Authentication did not return a token.');
