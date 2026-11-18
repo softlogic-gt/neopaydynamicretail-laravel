@@ -19,8 +19,8 @@ class AuthorizationTest extends TestCase
             && $r->header('membershipId') === ['MEM']
             && $r->header('secretKey') === ['SECRET']);
 
-        Http::assertSent(fn (Request $r) => $r->url() === 'https://pos.test/api/paymentcommerceauthorization'
-            && $r->header('Authorization') === ['JWT']
+        Http::assertSent(fn (Request $r) => $r->url() === 'https://pos.test/api/authorizationpaymentcommerce'
+            && $r->header('Authorization') === ['Bearer JWT']
             && $r->header('merchantUser') === ['user']
             && $r->header('merchantPasswd') === ['pass']
             && $r['transactionType'] === 'SA'

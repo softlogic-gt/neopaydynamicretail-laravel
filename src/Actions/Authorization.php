@@ -4,7 +4,7 @@ namespace SoftlogicGT\NeoPayDynamicRetail\Actions;
 
 final class Authorization extends PosAction
 {
-    protected string $endpoint = 'paymentcommerceauthorization';
+    protected string $endpoint = 'authorizationpaymentcommerce';
 
     public static function sale(int|string $trace, float $amount, ?float $tip = null, string $additionalData = ''): static
     {

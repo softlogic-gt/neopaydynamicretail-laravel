@@ -63,7 +63,7 @@ class PosFacadeTest extends TestCase
         $endpoints = array_map(fn ($r) => basename($r->url()), $this->posRequests());
         $this->assertSame(
             array_merge(
-                array_fill(0, 10, 'paymentcommerceauthorization'),
+                array_fill(0, 10, 'authorizationpaymentcommerce'),
                 ['paymentcommercesettlement', 'authorizationvoucherreprint', 'SendDigitalVoucher', 'transactiondetail', 'settlementdetail', 'settlementbatch', 'reporttotals'],
             ),
             $endpoints,
@@ -87,6 +87,6 @@ class PosFacadeTest extends TestCase
 
         NeoPayPos::annulment(1);
 
-        $this->assertSame(['paymentcommerceauthorization'], $fake->calls);
+        $this->assertSame(['authorizationpaymentcommerce'], $fake->calls);
     }
 }

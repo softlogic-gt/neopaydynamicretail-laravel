@@ -117,8 +117,8 @@ class PosClientTest extends TestCase
         $response = Authorization::annulment(1)->submit();
 
         $this->assertSame('00', $response->get('responseCode'));
-        $this->assertSame(['OLD'], $this->posRequests()[0]->header('Authorization'));
-        $this->assertSame(['NEW'], $this->posRequests()[1]->header('Authorization'));
+        $this->assertSame(['Bearer OLD'], $this->posRequests()[0]->header('Authorization'));
+        $this->assertSame(['Bearer NEW'], $this->posRequests()[1]->header('Authorization'));
     }
 
     public function test_persistent_401_does_not_loop(): void

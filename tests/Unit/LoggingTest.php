@@ -48,7 +48,7 @@ class LoggingTest extends TestCase
         SendDigitalVoucher::make('500815000512', 'Email', 'secreto@correo.com', 'Juan Perez')->submit();
 
         $this->assertSame(['info', 'neopay-dynamic-retail request'], array_slice($this->logged[0], 0, 2));
-        $this->assertSame('paymentcommerceauthorization', $this->logged[0][2]['endpoint']);
+        $this->assertSame('authorizationpaymentcommerce', $this->logged[0][2]['endpoint']);
         $this->assertSame('10000', $this->logged[0][2]['body']['amount']['amountTrans']);
         $this->assertSame('neopay-dynamic-retail response', $this->logged[1][1]);
 
@@ -92,7 +92,7 @@ class LoggingTest extends TestCase
 
         $failure = collect($this->logged)->first(fn ($l) => $l[1] === 'neopay-dynamic-retail failure');
         $this->assertSame('error', $failure[0]);
-        $this->assertSame(['endpoint' => 'paymentcommerceauthorization', 'status' => 500], $failure[2]);
+        $this->assertSame(['endpoint' => 'authorizationpaymentcommerce', 'status' => 500], $failure[2]);
     }
 
     public function test_authentication_failure_is_logged(): void

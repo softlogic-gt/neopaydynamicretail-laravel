@@ -69,7 +69,7 @@ class PosClient
             ->timeout(config('neopay-dynamic-retail.timeout'))
             ->acceptJson()
             ->withHeaders([
-                'Authorization' => $this->token(),
+                'Authorization' => 'Bearer '.$this->token(),
                 'merchantUser' => (string) config('neopay-dynamic-retail.merchant_user'),
                 'merchantPasswd' => (string) config('neopay-dynamic-retail.merchant_password'),
             ]);
